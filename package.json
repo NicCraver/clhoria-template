@@ -75,5 +75,9 @@
       "pnpm lint:fix",
       "bash -c 'pnpm typecheck'"
     ]
+  },
+  "volta": {
+    "node": "24.12.0",
+    "pnpm": "10.24.0"
   }
 }
