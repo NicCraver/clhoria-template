@@ -107,6 +107,9 @@ export const AppNameMenu = {
 
   /** 公共路由 */
   PUBLIC_APP: "publicApp",
+
+  /** 全部路由 */
+  ALL_APP: "allApp",
 } as const;
 
 /** 应用名称类型 */

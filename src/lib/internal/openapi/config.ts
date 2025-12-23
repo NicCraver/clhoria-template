@@ -16,10 +16,14 @@ export const APP_CONFIG: AppConfig[] = [
     name: "public",
     title: "公共API文档",
   },
+  {
+    name: "all",
+    title: "全部API文档",
+  },
 ];
 
 /** 应用OpenAPI版本 */
-export const OPENAPI_VERSION = "3.1.0";
+export const OPENAPI_VERSION = "3.0.0";
 
 /** Scalar配置 */
 export const SCALAR_CONFIG = {

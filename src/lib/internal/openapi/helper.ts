@@ -11,7 +11,11 @@ import { API_BASE_PATH, API_PUBLIC_NAME, APP_CONFIG, DOC_ENDPOINT, OPENAPI_VERSI
 
 export function createApps(): Record<AppNameType, AppOpenAPI> {
   return APP_CONFIG.reduce((acc, config) => {
-    const path = config.basePath ?? (config.name === API_PUBLIC_NAME ? API_BASE_PATH : `${API_BASE_PATH}/${config.name}`);
+    const path = config.basePath ?? (
+      config.name === API_PUBLIC_NAME || config.name === "all"
+        ? API_BASE_PATH
+        : `${API_BASE_PATH}/${config.name}`
+    );
     acc[`${config.name}App` as AppNameType] = createRouter().basePath(path);
     return acc;
   }, {} as Record<AppNameType, AppOpenAPI>);
@@ -34,13 +38,13 @@ export function configureAppDocumentation(router: AppOpenAPI, config: AppConfig)
 
   if (config.token) {
     const securityName = registerSecurityScheme(router, config);
-    router.doc31(DOC_ENDPOINT, {
+    router.doc(DOC_ENDPOINT, {
       ...docConfig,
       security: [{ [securityName]: [] }],
     });
   }
   else {
-    router.doc31(DOC_ENDPOINT, docConfig);
+    router.doc(DOC_ENDPOINT, docConfig);
   }
 }
 
@@ -68,6 +72,9 @@ export function createScalarAuthentication(): ScalarAuthentication {
 
 export function configureSubApplications(apps: Record<AppNameType, AppOpenAPI>) {
   APP_CONFIG.forEach((config) => {
+    // 跳过 all 配置，因为它需要特殊处理
+    if (config.name === "all")
+      return;
     const router = apps[`${config.name}App` as AppNameType];
     configureAppDocumentation(router, config);
   });
@@ -86,4 +93,18 @@ export function createMainDocConfigurator(apps: Record<AppNameType, AppOpenAPI>)
     configureSubApplications(apps);
     configureMainDocumentation(app);
   };
+}
+
+export function configureAllApp(apps: Record<AppNameType, AppOpenAPI>) {
+  const allConfig = APP_CONFIG.find(config => config.name === "all");
+  if (!allConfig)
+    return;
+
+  const allApp = apps.allApp;
+
+  // 为 allApp 配置 OpenAPI 文档，使用 /openapi.json 端点
+  allApp.doc("/openapi.json", {
+    openapi: OPENAPI_VERSION,
+    info: { version: packageJSON.version, title: allConfig.title },
+  });
 }
