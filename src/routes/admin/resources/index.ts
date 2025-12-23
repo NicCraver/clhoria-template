@@ -1,13 +1,15 @@
 import type { AppRouteHandler } from "@/types/lib";
 
-import { createRouter } from "@/lib/create-app";
+import { createRouter } from "@/lib/internal/create-app";
 
 import * as handlers from "./handlers";
 import * as routes from "./routes";
 
-export const objectStorage = createRouter()
+const objectStorage = createRouter()
   .openapi(routes.getUploadToken, handlers.getUploadToken)
   .openapi(routes.getDownloadToken, handlers.getDownloadToken);
+
+export default objectStorage;
 
 type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];

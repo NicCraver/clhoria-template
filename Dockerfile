@@ -50,8 +50,11 @@ ENV NODE_ENV=production
 ENV LOG_LEVEL=info
 
 # 安装运行时依赖并清理缓存
-RUN apk add --no-cache openssl && \
+RUN apk add --no-cache openssl curl && \
     rm -rf /var/cache/apk/*
+
+# 安装 dotenvx
+RUN curl -sfS https://dotenvx.sh/install.sh | sh
 
 # 创建非 root 用户
 RUN addgroup --system --gid 1001 nodejs && \
@@ -62,7 +65,7 @@ COPY --from=deps --chown=hono:nodejs /app/node_modules ./node_modules
 COPY --chown=hono:nodejs package.json pnpm-lock.yaml ./
 
 # 从构建阶段复制构建产物
-COPY --from=builder --chown=hono:nodejs /app/dist/index.mjs ./index.mjs
+COPY --from=builder --chown=hono:nodejs /app/dist/index.js ./index.js
 
 # 设置默认端口
 ARG PORT=9999
@@ -70,4 +73,4 @@ ENV PORT=${PORT}
 EXPOSE ${PORT}
 
 # 生产阶段入口点
-CMD ["node", "index.mjs"]
+CMD ["dotenvx", "run", "--", "node", "index.js"]
